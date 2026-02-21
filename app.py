@@ -3,6 +3,18 @@ import numpy as np
 import joblib
 import plotly.graph_objects as go
 
+import streamlit as st
+
+hide_streamlit_style = """
+    <style>
+        footer {visibility: hidden;}
+        .stDeployButton {display:none;}
+        #MainMenu {visibility: hidden;}
+        header {visibility: hidden;}
+    </style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 # Load your trained logistic regression model
 model = joblib.load("personality_model.pkl")
 
@@ -94,3 +106,4 @@ st.markdown("""
         <small>💻 Built with ❤️ using <strong>Streamlit</strong> | © 2025 Personality AI</small>
     </div>
 """, unsafe_allow_html=True)
+
