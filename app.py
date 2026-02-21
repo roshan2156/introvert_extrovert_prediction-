@@ -3,25 +3,44 @@ import numpy as np
 import joblib
 import plotly.graph_objects as go
 
-import streamlit as st
+# ✅ MUST be first Streamlit command
+st.set_page_config(
+    page_title="🧠 Personality Predictor",
+    page_icon="🌀",
+    layout="centered"
+)
 
+# ✅ Hide Streamlit branding, profile name & top bar
 hide_streamlit_style = """
     <style>
+        /* Hide footer (Hosted with Streamlit) */
         footer {visibility: hidden;}
-        .stDeployButton {display:none;}
-        #MainMenu {visibility: hidden;}
+
+        /* Hide header */
         header {visibility: hidden;}
+
+        /* Hide hamburger menu */
+        #MainMenu {visibility: hidden;}
+
+        /* Hide deploy button */
+        .stDeployButton {display:none;}
+
+        /* Hide top toolbar */
+        div[data-testid="stToolbar"] {display: none;}
+
+        /* Hide profile / creator name area */
+        div[data-testid="stStatusWidget"] {display: none;}
+
+        /* Hide Streamlit decoration */
+        div[data-testid="stDecoration"] {display: none;}
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-# Load your trained logistic regression model
+# Load trained model
 model = joblib.load("personality_model.pkl")
 
-# Set Streamlit page config
-st.set_page_config(page_title="🧠 Personality Predictor", page_icon="🌀", layout="centered")
-
-# 🌟 HEADER with emojis and styled text
+# 🌟 HEADER
 st.markdown("""
     <div style='text-align: center; padding: 10px 0;'>
         <h1 style='color:#6a1b9a;'>🧠 Personality Prediction App</h1>
@@ -31,7 +50,7 @@ st.markdown("""
     <hr style="border: 1px solid #ddd;">
 """, unsafe_allow_html=True)
 
-# 🎚️ User Input Section
+# 🎚️ Input Section
 st.subheader("📝 Enter Personality Traits Below:")
 
 col1, col2 = st.columns(2)
@@ -48,48 +67,45 @@ with col2:
     public_speaking = st.selectbox("🎤 Enjoy public speaking?", [0, 1], format_func=lambda x: "Yes" if x == 1 else "No")
     decision_speed = st.selectbox("🚀 Decision making speed", [0, 1], format_func=lambda x: "Fast" if x == 0 else "Slow")
 
-# Convert selectbox to numeric
+# Convert energy to numeric
 energy_after_social = 0 if energy_after_social == "Energized (0)" else 1
 
-# 🎯 Predict Button
+# 🎯 Prediction
 if st.button("🔍 Predict Personality"):
-    # Input features as array
-    input_features = np.array([[social_time, talkative_score, prefers_solo, crowd_comfort,
-                                energy_after_social, num_friends, public_speaking, decision_speed]])
+
+    input_features = np.array([[social_time, talkative_score, prefers_solo,
+                                crowd_comfort, energy_after_social,
+                                num_friends, public_speaking, decision_speed]])
 
     prediction = model.predict(input_features)[0]
 
     st.markdown("---")
 
-    # ✅ Prediction Result
     if prediction == 1:
-        st.success("🟢 The person is likely an **Extrovert** 🎉\n\nThey enjoy social interaction, are expressive, and energized by people.")
+        st.success("🟢 The person is likely an **Extrovert** 🎉\n\nThey enjoy social interaction and feel energized around people.")
     else:
-        st.warning("🔵 The person is likely an **Introvert** 🌙\n\nThey prefer quiet environments, deep thinking, and solo activities.")
+        st.warning("🔵 The person is likely an **Introvert** 🌙\n\nThey prefer quiet environments and solo activities.")
 
-    # 📊 Model Info
     st.info("📌 Model Used: **Logistic Regression**")
 
-    # 📈 Show input traits as Bar Chart
+    # 📊 Bar Chart
     st.subheader("📊 Trait Scores Overview")
+    st.bar_chart(input_features[0], use_container_width=True)
+
+    # 🕸️ Radar Chart
+    st.subheader("🕸️ Personality Radar Chart")
 
     feature_names = [
         "Social Time", "Talkative", "Prefers Solo", "Crowd Comfort",
         "Energy After Social", "Close Friends", "Public Speaking", "Decision Speed"
     ]
 
-    st.bar_chart(data=np.array(input_features[0]), use_container_width=True)
-
-    # 🕸️ Radar Chart
-    st.subheader("🕸️ Personality Radar Chart")
-
     fig = go.Figure()
     fig.add_trace(go.Scatterpolar(
         r=input_features[0],
         theta=feature_names,
         fill='toself',
-        name='Personality Traits',
-        line=dict(color='royalblue')
+        name='Traits'
     ))
 
     fig.update_layout(
@@ -99,11 +115,10 @@ if st.button("🔍 Predict Personality"):
 
     st.plotly_chart(fig, use_container_width=True)
 
-# 🌟 Footer
+# 🌟 Custom Footer
 st.markdown("""
     <hr>
     <div style='text-align: center; color: gray;'>
-        <small>💻 Built with ❤️ using <strong>Streamlit</strong> | © 2025 Personality AI</small>
+        <small>💻 Built with ❤️ | © 2025 Personality AI</small>
     </div>
 """, unsafe_allow_html=True)
-
